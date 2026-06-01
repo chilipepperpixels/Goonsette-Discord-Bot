@@ -8,19 +8,22 @@ const {
 
 dotenv.config();
 
-const allowedRaiderHubPermissions = [
-  PermissionFlagsBits.ViewChannel,
-  PermissionFlagsBits.SendMessages,
-  PermissionFlagsBits.ReadMessageHistory,
-  PermissionFlagsBits.AttachFiles,
-  PermissionFlagsBits.EmbedLinks,
-  PermissionFlagsBits.AddReactions,
-  PermissionFlagsBits.UseExternalEmojis,
-  PermissionFlagsBits.UseExternalStickers,
+const allowedRaiderHubPermissionNames = [
+  "ViewChannel",
+  "SendMessages",
+  "ReadMessageHistory",
+  "AttachFiles",
+  "EmbedLinks",
+  "AddReactions",
+  "UseExternalEmojis",
+  "UseExternalStickers",
 ];
 
-const deniedRaiderHubPermissions = Object.values(PermissionFlagsBits).filter(
-  (perm) => !allowedRaiderHubPermissions.includes(perm),
+const raiderHubPermissionOverwrites = Object.fromEntries(
+  Object.keys(PermissionFlagsBits).map((permission) => [
+    permission,
+    allowedRaiderHubPermissionNames.includes(permission),
+  ]),
 );
 
 const prefix = ".";
@@ -484,8 +487,7 @@ client.on("messageCreate", async (message) => {
     }
 
     await message.channel.permissionOverwrites.edit(targetMember.id, {
-      allow: allowedRaiderHubPermissions,
-      deny: deniedRaiderHubPermissions,
+      ...raiderHubPermissionOverwrites,
     });
 
     return message.reply(`Added ${targetMember} to this RaiderHub.`);
