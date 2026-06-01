@@ -492,6 +492,16 @@ client.on("messageCreate", async (message) => {
 
     return message.reply(`Added ${targetMember} to this RaiderHub.`);
   }
+
+  const safeName = targetMember.displayName
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+
+  await message.channel.setName("${safeName}");
+
+  return message.reply(`Renamed this RaiderHub to ${safeName}.`);
 });
 
 client.login(token);
