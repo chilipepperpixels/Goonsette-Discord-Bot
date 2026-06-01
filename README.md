@@ -1,6 +1,6 @@
 # Goonsette Discord Bot
 
-Tiny Discord bot for guild officer stuff, RaiderHub channels, editable guild links, and a couple of definitely-normal side quests.
+Tiny Discord bot for guild officer stuff, RaiderHub channels, editable guild links, and a couple of definitely-normal things.
 
 Built with `discord.js`. Hosted on Railway. Held together with code, spite, and a persistent volume so edited JSON does not vanish into the void.
 
