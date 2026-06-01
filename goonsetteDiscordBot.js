@@ -1,7 +1,27 @@
 const dotenv = require("dotenv");
-const { ChannelType, Client, GatewayIntentBits } = require("discord.js");
+const {
+  ChannelType,
+  Client,
+  PermissionFlagsBits,
+  GatewayIntentBits,
+} = require("discord.js");
 
 dotenv.config();
+
+const allowedRaiderHubPermissions = [
+  PermissionFlagsBits.ViewChannel,
+  PermissionFlagsBits.SendMessages,
+  PermissionFlagsBits.ReadMessageHistory,
+  PermissionFlagsBits.AttachFiles,
+  PermissionFlagsBits.EmbedLinks,
+  PermissionFlagsBits.AddReactions,
+  PermissionFlagsBits.UseExternalEmojis,
+  PermissionFlagsBits.UseExternalStickers,
+];
+
+const deniedRaiderHubPermissions = Object.values(PermissionFlagsBits).filter(
+  (perm) => !allowedRaiderHubPermissions.includes(perm),
+);
 
 const prefix = ".";
 const token = process.env.DISCORD_BOT_TOKEN;
@@ -33,6 +53,7 @@ const commands = new Map([
   ["edit", {}],
   ["links", {}],
   ["newraiderhub", {}],
+  ["addraider", { allowedCategories: ["1363092698093064424"] }],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -435,6 +456,39 @@ client.on("messageCreate", async (message) => {
     });
 
     return message.reply(`Created new RaiderHub channel: ${createdChannel}`);
+  }
+
+  if (command === "addraider") {
+    const hasAllowedRole = allowedRoles.some((roleId) =>
+      message.member.roles.cache.has(roleId),
+    );
+
+    if (!hasAllowedRole) {
+      return message.reply(
+        "You do not have permission to use this command. You can look at my boobs though!",
+      );
+    }
+
+    const raiderHubCategoryId = "1363092698093064424";
+
+    if (message.channel.parentId !== raiderHubCategoryId) {
+      return message.reply(
+        "You can only use this command in a RaiderHub channel.",
+      );
+    }
+
+    const targetMember = message.mentions.members.first();
+
+    if (!targetMember) {
+      return message.reply("Please mention a user to add to this RaiderHub.");
+    }
+
+    await message.channel.permissionOverwrites.edit(targetMember.id, {
+      allow: allowedRaiderHubPermissions,
+      deny: deniedRaiderHubPermissions,
+    });
+
+    return message.reply(`Added ${targetMember} to this RaiderHub.`);
   }
 });
 
