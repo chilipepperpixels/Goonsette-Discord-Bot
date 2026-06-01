@@ -7,8 +7,15 @@ const prefix = ".";
 const token = process.env.DISCORD_BOT_TOKEN;
 const startedAt = Date.now();
 const fs = require("fs");
+const path = require("path");
+const defaultConfigPath = path.join(__dirname, "guildMessage.json");
+
+const liveConfigPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
+  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "guildMessage.json")
+  : defaultConfigPath;
+
 const config = () => {
-  return JSON.parse(fs.readFileSync("./guildMessage.json", "utf8"));
+  return JSON.parse(fs.readFileSync(liveConfigPath, "utf8"));
 };
 const allowedCategories = [
   "1363092698093064424",
@@ -50,6 +57,10 @@ const applyLinks = (text, links) => {
     return links[key] || match;
   });
 };
+
+if (!fs.existsSync(liveConfigPath)) {
+  fs.copyFileSync(defaultConfigPath, liveConfigPath);
+}
 
 if (!token) {
   console.error(
@@ -353,7 +364,7 @@ client.on("messageCreate", async (message) => {
 
     guildConfig.links[fieldName] = newUrl;
 
-    fs.writeFileSync("./guildMessage.json", JSON.stringify(guildConfig, null, 2));
+    fs.writeFileSync(liveConfigPath, JSON.stringify(guildConfig, null, 2));
 
     return message.reply(`Updated ${fieldName} link.`);
   }
