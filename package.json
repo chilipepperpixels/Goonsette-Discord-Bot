@@ -1,0 +1,18 @@
+{
+  "name": "goonsette-discord-bot",
+  "version": "1.0.0",
+  "description": "",
+  "main": "goonsetteDiscordBot.js",
+  "scripts": {
+    "start": "node goonsetteDiscordBot.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "discord.js": "^14.26.4",
+    "dotenv": "^16.6.1"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "links": {
+    "absenceForm": "https://forms.gle/ejqB4HDKEWJ7C3HJ6",
+    "consumableRequestForm": "https://forms.gle/dD4qGrxmkNkLgckb7",
+    "raidAssignments": "https://docs.google.com/spreadsheets/d/1XIXxlWjDxnQda-dkFzVJGoGlSH2dyd5b6w7OWbtwhLY",
+    "thatsMyBis": "https://thatsmybis.com/",
+    "wowSims": "https://www.wowsims.com/mop/"
+  },
+  "embeds": [
+    {
+      "description": "This channel serves as a direct but private link between **You** and the **Officer Team**!\n\n*If you have any questions, feedback, something to discuss or just to vent, feel free to message us here!*",
+      "color": 5814783
+    },
+    {
+      "description": "## Important links and documents:\n<#1402930215163920405> - WeakAuras and other things related to raiding.\n<#1370832674360528976> This is where we post the rosters and roster changes.\n\n[**Absence form**](<{{absenceForm}}>) - Use this to give us a heads up if you can't make it to any of the raids in the future. Please try to give us notice in advance so we can plan ahead. \n[**Consumable request form**](<{{consumableRequestForm}}>) - You can request food, flasks, potions and enchants by using this form. \n[**Raid assignments**](<{{raidAssignments}}>) - This spreadsheet serves as the guild assignment panel. You can see what jobs you are required to do, general positions in the raids and other useful information. \n\n[**Thatsmybis**](<{{thatsMyBis}}>) - Please log in with Discord and join Drumroll on TMB. After joining, make sure you create your character. Once you have a character in the guild, please make a wishlist with your BiS items and provide useful information such as upgrade values (use [wowsims](<{{wowSims}}>)) about certain pieces in notes. This helps us determine loot priorities and track loot in general. \n\n\n\n\n\n",
+      "color": 5814783
+    }
+  ],
+  "components": []
+}
