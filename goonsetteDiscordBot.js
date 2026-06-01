@@ -10,13 +10,16 @@ const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
 
-const liveConfigPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
-  ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "guildMessage.json")
-  : defaultConfigPath;
+const liveConfigPath = () => {
+  return process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "guildMessage.json")
+    : defaultConfigPath;
+};
 
 const config = () => {
-  return JSON.parse(fs.readFileSync(liveConfigPath, "utf8"));
+  return JSON.parse(fs.readFileSync(liveConfigPath(), "utf8"));
 };
+
 const allowedCategories = [
   "1363092698093064424",
   "1322990758847844423",
@@ -28,6 +31,7 @@ const commands = new Map([
   ["random", {}],
   ["help", {}],
   ["edit", {}],
+  ["links", {}],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -58,8 +62,8 @@ const applyLinks = (text, links) => {
   });
 };
 
-if (!fs.existsSync(liveConfigPath)) {
-  fs.copyFileSync(defaultConfigPath, liveConfigPath);
+if (!fs.existsSync(liveConfigPath())) {
+  fs.copyFileSync(defaultConfigPath, liveConfigPath());
 }
 
 if (!token) {
@@ -364,9 +368,20 @@ client.on("messageCreate", async (message) => {
 
     guildConfig.links[fieldName] = newUrl;
 
-    fs.writeFileSync(liveConfigPath, JSON.stringify(guildConfig, null, 2));
+    fs.writeFileSync(liveConfigPath(), JSON.stringify(guildConfig, null, 2));
 
     return message.reply(`Updated ${fieldName} link.`);
+  }
+  if (command === "links") {
+    const guildConfig = config();
+    const linksEmbed = {
+      ...guildConfig.embeds[1],
+      description: applyLinks(
+        guildConfig.embeds[1].description,
+        guildConfig.links,
+      ),
+    };
+    return message.reply({ embeds: [linksEmbed] });
   }
 });
 
