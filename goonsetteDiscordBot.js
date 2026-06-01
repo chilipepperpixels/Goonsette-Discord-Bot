@@ -8,6 +8,7 @@ const {
 
 dotenv.config();
 
+// Permissions granted to a raider when they are added to a private RaiderHub channel.
 const allowedRaiderHubPermissionNames = [
   "ViewChannel",
   "SendMessages",
@@ -33,6 +34,7 @@ const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
 
+// Railway uses a persistent volume for live-edited JSON; local runs use the repo file.
 const liveConfigPath = () => {
   return process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "guildMessage.json")
@@ -43,6 +45,7 @@ const config = () => {
   return JSON.parse(fs.readFileSync(liveConfigPath(), "utf8"));
 };
 
+// Categories where specific commands are allowed to run.
 const allowedCategories = [
   "1363092698093064424",
   "1322990758847844423",
@@ -81,6 +84,8 @@ const normalizedBlockedTags = rule34BlockedTags.map((tag) =>
 const isVideoUrl = (url) => /\.(mp4|webm)(?:[?#].*)?$/i.test(url);
 const allowedChannel = ["1466449507972812924", "1322991455542710456"];
 const allowedRoles = ["1466907960272748696"];
+
+// Replaces {{linkName}} placeholders in JSON embeds with live links.
 const applyLinks = (text, links) => {
   return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     return links[key] || match;
@@ -111,6 +116,7 @@ client.once("clientReady", () => {
 });
 
 client.on("messageCreate", async (message) => {
+  // Ignore bots, old messages, and messages that do not use the bot prefix.
   if (message.author?.bot) return;
   if (message.createdTimestamp < startedAt) return;
 
@@ -130,6 +136,7 @@ client.on("messageCreate", async (message) => {
   }
   if (!cmd) return;
 
+  // Some commands are locked to specific Discord categories.
   if (cmd.allowedCategories) {
     const channelCategoryId = message.channel.parentId;
 
@@ -143,6 +150,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "raiderhub") {
+    // Posts the full RaiderHub embed from guildMessage.json.
     const guildConfig = config();
 
     const embeds = guildConfig.embeds.map((embed) => ({
@@ -159,6 +167,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "r34") {
+    // Searches Rule34 by tags and posts one random matching result.
     if (!allowedChannel.includes(message.channel.id)) {
       return message.reply(
         "That command only works in the allowed R34 channels.",
@@ -248,6 +257,7 @@ client.on("messageCreate", async (message) => {
     }
   }
   if (command === "random") {
+    // Uses Rule34's random URL and retries if a blocked tag appears.
     if (!allowedChannel.includes(message.channel.id)) {
       return message.reply(
         "That command only works in the allowed R34 channels.",
@@ -353,6 +363,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "help") {
+    // Shows different help text depending on whether the channel allows R34 commands.
     if (allowedChannel.includes(message.channel.id)) {
       return message.reply({
         content:
@@ -366,6 +377,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "edit") {
+    // Lets allowed officers update live links in guildMessage.json.
     const editableFields = Object.keys(config().links);
     const fieldName = args[0];
     const newUrl = args[1];
@@ -398,6 +410,7 @@ client.on("messageCreate", async (message) => {
     return message.reply(`Updated ${fieldName} link.`);
   }
   if (command === "links") {
+    // Posts only the important-links embed from guildMessage.json.
     const guildConfig = config();
     const linksEmbed = {
       ...guildConfig.embeds[1],
@@ -410,6 +423,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "newraiderhub") {
+    // Creates a numbered private RaiderHub channel and posts the intro embed there.
     const hasAllowedRole = allowedRoles.some((roleId) =>
       message.member.roles.cache.has(roleId),
     );
@@ -462,6 +476,7 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "addraider") {
+    // Adds a mentioned guild member to the current RaiderHub channel and renames it.
     const hasAllowedRole = allowedRoles.some((roleId) =>
       message.member.roles.cache.has(roleId),
     );
