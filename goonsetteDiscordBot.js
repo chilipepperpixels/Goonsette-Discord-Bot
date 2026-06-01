@@ -1,5 +1,5 @@
 const dotenv = require("dotenv");
-const { Client, GatewayIntentBits } = require("discord.js");
+const { ChannelType, Client, GatewayIntentBits } = require("discord.js");
 
 dotenv.config();
 
@@ -32,6 +32,7 @@ const commands = new Map([
   ["help", {}],
   ["edit", {}],
   ["links", {}],
+  ["newraiderhub", {}],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -382,6 +383,58 @@ client.on("messageCreate", async (message) => {
       ),
     };
     return message.reply({ embeds: [linksEmbed] });
+  }
+
+  if (command === "newraiderhub") {
+    const hasAllowedRole = allowedRoles.some((roleId) =>
+      message.member.roles.cache.has(roleId),
+    );
+
+    if (!hasAllowedRole) {
+      return message.reply(
+        "You do not have permission to use this command. You can look at my boobs though!",
+      );
+    }
+    const targetCategoryId = "1363092698093064424";
+    const baseName = "new-raider-hub";
+
+    const channelIsInCategory = message.guild.channels.cache.filter(
+      (channel) => {
+        return channel.parentId === targetCategoryId;
+      },
+    );
+
+    const existingChannel = channelIsInCategory.map((channel) => channel.name);
+
+    let number = 1;
+    let newChannelName = `${baseName}-${number}`;
+
+    while (existingChannel.includes(newChannelName)) {
+      number++;
+      newChannelName = `${baseName}-${number}`;
+    }
+
+    const createdChannel = await message.guild.channels.create({
+      name: newChannelName,
+      type: ChannelType.GuildText,
+      parent: targetCategoryId,
+    });
+
+    const guildConfig = config();
+
+    const embeds = guildConfig.embeds.map((embed) => ({
+      ...embed,
+      description: embed.description
+        ? applyLinks(embed.description, guildConfig.links)
+        : embed.description,
+    }));
+
+    await createdChannel.send({
+      embeds,
+      components: guildConfig.components,
+    });
+
+    return message.reply(`Created new RaiderHub channel: ${createdChannel}`);
   }
 });
 
