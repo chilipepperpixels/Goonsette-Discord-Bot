@@ -60,6 +60,7 @@ const commands = new Map([
   ["links", {}],
   ["newraiderhub", {}],
   ["addraider", { allowedCategories: ["1363092698093064424"] }],
+  ["postallrh", { allowedCategories: ["1363092698093064424"] }],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -90,6 +91,22 @@ const applyLinks = (text, links) => {
   return text.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     return links[key] || match;
   });
+};
+
+const guildMessagePayload = () => {
+  const guildConfig = config();
+
+  const embeds = guildConfig.embeds.map((embed) => ({
+    ...embed,
+    description: embed.description
+      ? applyLinks(embed.description, guildConfig.links)
+      : embed.description,
+  }));
+
+  return {
+    embeds,
+    components: guildConfig.components,
+  };
 };
 
 if (!fs.existsSync(liveConfigPath())) {
@@ -151,19 +168,7 @@ client.on("messageCreate", async (message) => {
 
   if (command === "raiderhub") {
     // Posts the full RaiderHub embed from guildMessage.json.
-    const guildConfig = config();
-
-    const embeds = guildConfig.embeds.map((embed) => ({
-      ...embed,
-      description: embed.description
-        ? applyLinks(embed.description, guildConfig.links)
-        : embed.description,
-    }));
-
-    message.reply({
-      embeds,
-      components: guildConfig.components,
-    });
+    message.reply(guildMessagePayload());
   }
 
   if (command === "r34") {
@@ -458,19 +463,7 @@ client.on("messageCreate", async (message) => {
       parent: targetCategoryId,
     });
 
-    const guildConfig = config();
-
-    const embeds = guildConfig.embeds.map((embed) => ({
-      ...embed,
-      description: embed.description
-        ? applyLinks(embed.description, guildConfig.links)
-        : embed.description,
-    }));
-
-    await createdChannel.send({
-      embeds,
-      components: guildConfig.components,
-    });
+    await createdChannel.send(guildMessagePayload());
 
     return message.reply(`Created new RaiderHub channel: ${createdChannel}`);
   }
@@ -515,6 +508,68 @@ client.on("messageCreate", async (message) => {
 
     return message.reply(
       `Added ${targetMember} and renamed this RaiderHub to ${safeName}.`,
+    );
+  }
+
+  if (command === "postallrh") {
+    // Refreshes the pinned RaiderHub info message in every text channel in the category.
+    const hasAllowedRole = allowedRoles.some((roleId) =>
+      message.member.roles.cache.has(roleId),
+    );
+
+    if (!hasAllowedRole) {
+      return message.reply(
+        "You do not have permission to use this command. You can look at my boobs though!",
+      );
+    }
+
+    const raiderHubCategoryId = "1363092698093064424";
+    await message.guild.channels.fetch();
+
+    const raiderHubChannels = message.guild.channels.cache
+      .filter((channel) => {
+        return (
+          channel.parentId === raiderHubCategoryId &&
+          channel.type === ChannelType.GuildText
+        );
+      })
+      .sort((left, right) => left.position - right.position);
+
+    if (!raiderHubChannels.size) {
+      return message.reply("No RaiderHub text channels found in the category.");
+    }
+
+    let refreshedCount = 0;
+    const failedChannels = [];
+
+    for (const channel of raiderHubChannels.values()) {
+      try {
+        const pinnedMessages = await channel.messages.fetchPinned();
+
+        for (const pinnedMessage of pinnedMessages.values()) {
+          await pinnedMessage.unpin("Refreshing RaiderHub guild message.");
+        }
+
+        const postedMessage = await channel.send(guildMessagePayload());
+        await postedMessage.pin("Refreshing RaiderHub guild message.");
+        refreshedCount++;
+      } catch (error) {
+        failedChannels.push(channel.name);
+        console.error(
+          `Failed to refresh RaiderHub channel ${channel.id}:`,
+          error,
+        );
+      }
+    }
+
+    if (failedChannels.length) {
+      return message.reply(
+        `Refreshed ${refreshedCount}/${raiderHubChannels.size} RaiderHub channels. Failed: ${failedChannels.join(", ")}`,
+      );
+    }
+
+    return message.reply(
+      `Refreshed and pinned RaiderHub info in ${refreshedCount} channels.`,
     );
   }
 });
