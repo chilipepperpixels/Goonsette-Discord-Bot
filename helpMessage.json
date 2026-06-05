@@ -1,0 +1,73 @@
+{
+  "messages": [
+    {
+      "embeds": [
+        {
+          "title": "RaiderHub Link Editing Guide",
+          "description": "Use `.edit` to update links in the RaiderHub embed.\n\n**Command format**\n`.edit fieldName <https://new-link-here>`\n\n**Editable fields**\n`absenceForm`\n`consumableRequestForm`\n`raidAssignments`\n`thatsMyBis`\n`wowSims`\n\n**Examples**\nUpdate the absence form:\n`.edit absenceForm <https://forms.gle/example>`\n\nUpdate the consumable request form:\n`.edit consumableRequestForm <https://forms.gle/example>`\n\nUpdate the raid assignment sheet:\n`.edit raidAssignments <https://docs.google.com/spreadsheets/d/example>`\n\nUpdate ThatsMyBis:\n`.edit thatsMyBis <https://thatsmybis.com/>`\n\nUpdate WowSims:\n`.edit wowSims <https://www.wowsims.com/mop/>`",
+          "color": 16738740
+        },
+        {
+          "title": "Rules",
+          "description": "- __The link must start with__ `https://`\n- __This will NOT work:__\n`.edit raidAssignments <docs.google.com/example>`\n- __This WILL work:__\n`.edit raidAssignments <https://docs.google.com/example>`\n- __Only officers with the allowed role can use__ `.edit`.\n- __After changing a link, run__ `.raiderhub` to check the updated RaiderHub embed.",
+          "color": 5814783
+        },
+        {
+          "title": "If something goes wrong",
+          "description": "If the bot says `Unknown editable field`, you typed the field name wrong.\n\nUse one of these exact names:\n`absenceForm`\n`consumableRequestForm`\n`raidAssignments`\n`thatsMyBis`\n`wowSims`\n\nIf the bot says `Please give me a valid https link.`, your link is missing `https://` at the start.",
+          "color": 5814783
+        }
+      ]
+    },
+    {
+      "embeds": [
+        {
+          "title": "RaiderHub Channel Commands",
+          "description": "**Create a new RaiderHub channel**\n`.newraiderhub`\n\nThis creates a new private RaiderHub channel in the RaiderHub category.\n\nThe bot names it automatically:\n`new-raider-hub-1`\n`new-raider-hub-2`\n`new-raider-hub-3`\n\nYou do not type a channel name.\n\n**Add a raider to the current RaiderHub channel**\n`.addraider @user`\n\nExample:\n`.addraider @Pepper`",
+          "color": 16738740
+        },
+        {
+          "title": "Important",
+          "description": "You must mention the actual Discord user.\n\nUse the real Discord mention:\n`@TheirDiscordAccount`\n\nDo NOT type their display name as plain text.\n\nThis will NOT work:\n`.addraider Pepper`\n\nThis WILL work:\n`.addraider @Pepper`\n\nThe bot needs the real Discord mention so it can find the correct user account and give them access to the private channel.",
+          "color": 5814783
+        },
+        {
+          "title": "Where to use these",
+          "description": "`.newraiderhub` can be used by officers with permission.\n\n`.addraider` must be used inside a RaiderHub channel.",
+          "color": 5814783
+        }
+      ]
+    },
+    {
+      "embeds": [
+        {
+          "title": "What `.addraider` does",
+          "description": "It gives the mentioned user permission to:\n- view the channel\n- send messages\n- read message history\n- attach files\n- embed links\n- react\n- use external emojis\n- use external stickers\n- renames the channel using the mentioned user's displayname",
+          "color": 16738740
+        },
+        {
+          "title": "If something goes wrong",
+          "description": "If the bot says:\n`Please mention a user to add to this RaiderHub.`\n\nThen you did not use a real `@` mention.\n\nUse:\n`.addraider @user`\n\nNot:\n`.addraider username`",
+          "color": 5814783
+        },
+        {
+          "title": "Other useful commands",
+          "description": "**Post the RaiderHub embed**\n`.raiderhub`\n\nThis posts the RaiderHub embed with the current saved links.\n\nUse this after `.edit` so you can check if you changed the correct thing.\n\n**Post only the important links**\n`.links`\n\nThis posts only the important links and documents embed.\n\nUse this if you do not need the full RaiderHub message.\n\n**Refresh every RaiderHub channel**\n`.postallrh`\n\nThis reposts and pins the RaiderHub info in every RaiderHub channel.\n\nOfficer command. Do not press the big shiny button unless you actually mean it.\n\n**Show this guide**\n`.help`\n\nThis posts this guide. Obviously. Somehow still useful.",
+          "color": 5814783
+        }
+      ]
+    }
+  ],
+  "r34Message": {
+    "embeds": [
+      {
+        "title": "R34 Commands",
+        "description": "**Search by tags**\n`.r34 <tags>`\n\nExample:\n`.r34 kaine_(nier)`\n\nIf you do not type tags, the bot uses `2b`.\n\n**Random R34**\n`.random`\n\nThis grabs a random R34 post.\n\n**Where to use these**\nThese only work in the allowed R34 channels.\n\nIf the bot says `That command only works in the allowed R34 channels.`, you are in the wrong channel. Move your horny ass to the right one.",
+        "color": 16738740,
+        "footer": {
+          "text": "Source: rule34.xxx"
+        }
+      }
+    ]
+  }
+}

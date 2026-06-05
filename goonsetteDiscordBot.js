@@ -33,6 +33,7 @@ const startedAt = Date.now();
 const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
+const helpMessagePath = path.join(__dirname, "helpMessage.json");
 
 // Railway uses a persistent volume for live-edited JSON; local runs use the repo file.
 const liveConfigPath = () => {
@@ -107,6 +108,17 @@ const guildMessagePayload = () => {
     embeds,
     components: guildConfig.components,
   };
+};
+
+const helpMessagePayloads = (includeR34Commands) => {
+  const helpConfig = JSON.parse(fs.readFileSync(helpMessagePath, "utf8"));
+  const payloads = [...helpConfig.messages];
+
+  if (includeR34Commands) {
+    payloads.push(helpConfig.r34Message);
+  }
+
+  return payloads;
 };
 
 if (!fs.existsSync(liveConfigPath())) {
@@ -368,42 +380,18 @@ client.on("messageCreate", async (message) => {
   }
 
   if (command === "help") {
-    // Shows different help text depending on whether the channel allows R34 commands.
-    const basicHelp = [
-      "Available commands:",
-      "- `.help`: Show this command list.",
-      "- `.raiderhub`: Post the full RaiderHub info message. Only works inside RaiderHub categories.",
-      "- `.links`: Post the important links and documents message.",
-      "",
-      "Officer commands:",
-      "- `.edit <field> <https://link>`: Update one saved link used by the info embeds.",
-      "- `.newraiderhub`: Create the next `new-raider-hub-N` channel and post the RaiderHub intro.",
-      "- `.addraider @user`: Add a raider to the current RaiderHub channel and rename it after them.",
-      "- `.postallrh`: Repost the RaiderHub info message in every RaiderHub channel.",
-      "",
-      "Examples:",
-      "- `.links`",
-      "- `.edit absenceForm https://example.com/form`",
-      "- `.addraider @Pepper`",
-    ];
+    // Posts the pretty help guide from helpMessage.json.
+    const helpPayloads = helpMessagePayloads(
+      allowedChannel.includes(message.channel.id),
+    );
 
-    if (allowedChannel.includes(message.channel.id)) {
-      return message.reply({
-        content: [
-          ...basicHelp,
-          "",
-          "R34 commands for this channel:",
-          "- `.r34 <tags>`: Search Rule34 by tags and post one random matching result.",
-          "- `.random`: Post a random Rule34 result.",
-          "",
-          "R34 examples:",
-          "- `.r34 kaine_(nier)`",
-          "- `.r34 2b`",
-        ].join("\n"),
-      });
-    } else {
-      return message.reply(basicHelp.join("\n"));
+    await message.reply(helpPayloads[0]);
+
+    for (const payload of helpPayloads.slice(1)) {
+      await message.channel.send(payload);
     }
+
+    return;
   }
 
   if (command === "edit") {
