@@ -369,15 +369,40 @@ client.on("messageCreate", async (message) => {
 
   if (command === "help") {
     // Shows different help text depending on whether the channel allows R34 commands.
+    const basicHelp = [
+      "Available commands:",
+      "- `.help`: Show this command list.",
+      "- `.raiderhub`: Post the full RaiderHub info message. Only works inside RaiderHub categories.",
+      "- `.links`: Post the important links and documents message.",
+      "",
+      "Officer commands:",
+      "- `.edit <field> <https://link>`: Update one saved link used by the info embeds.",
+      "- `.newraiderhub`: Create the next `new-raider-hub-N` channel and post the RaiderHub intro.",
+      "- `.addraider @user`: Add a raider to the current RaiderHub channel and rename it after them.",
+      "- `.postallrh`: Repost the RaiderHub info message in every RaiderHub channel.",
+      "",
+      "Examples:",
+      "- `.links`",
+      "- `.edit absenceForm https://example.com/form`",
+      "- `.addraider @Pepper`",
+    ];
+
     if (allowedChannel.includes(message.channel.id)) {
       return message.reply({
-        content:
-          "Available commands:\n- `.r34 <tags>`: Fetch a random image from Rule34 based on tags (i.e., '.r34 kaine_(nier)')\n- `.random`: Fetch a random image from Rule34",
+        content: [
+          ...basicHelp,
+          "",
+          "R34 commands for this channel:",
+          "- `.r34 <tags>`: Search Rule34 by tags and post one random matching result.",
+          "- `.random`: Post a random Rule34 result.",
+          "",
+          "R34 examples:",
+          "- `.r34 kaine_(nier)`",
+          "- `.r34 2b`",
+        ].join("\n"),
       });
     } else {
-      return message.reply(
-        "Available commands:\n- `.raiderhub`: Get the RaiderHub info",
-      );
+      return message.reply(basicHelp.join("\n"));
     }
   }
 
