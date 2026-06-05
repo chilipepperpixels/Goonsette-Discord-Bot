@@ -34,6 +34,7 @@ const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
 const helpMessagePath = path.join(__dirname, "helpMessage.json");
+const defaultTrackedMessagesPath = path.join(__dirname, "trackedMessages.json");
 
 // Railway uses a persistent volume for live-edited JSON; local runs use the repo file.
 const liveConfigPath = () => {
@@ -44,6 +45,12 @@ const liveConfigPath = () => {
 
 const config = () => {
   return JSON.parse(fs.readFileSync(liveConfigPath(), "utf8"));
+};
+
+const liveTrackedMessagesPath = () => {
+  return process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "trackedMessages.json")
+    : defaultTrackedMessagesPath;
 };
 
 // Categories where specific commands are allowed to run.
@@ -86,6 +93,25 @@ const normalizedBlockedTags = rule34BlockedTags.map((tag) =>
 const isVideoUrl = (url) => /\.(mp4|webm)(?:[?#].*)?$/i.test(url);
 const allowedChannel = ["1466449507972812924", "1322991455542710456"];
 const allowedRoles = ["1466907960272748696"];
+const WATCHED_CHANNEL_ID = "1396550738691493969";
+const OFFICER_CHANNEL_ID = "1322991455542710456";
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+const trackedMessages = {};
+
+function loadTrackedMessages() {
+  if (!fs.existsSync(liveTrackedMessagesPath())) return;
+  const savedMessages = JSON.parse(
+    fs.readFileSync(liveTrackedMessagesPath(), "utf8"),
+  );
+  Object.assign(trackedMessages, savedMessages);
+}
+
+function saveTrackedMessages() {
+  fs.writeFileSync(
+    liveTrackedMessagesPath(),
+    JSON.stringify(trackedMessages, null, 2),
+  );
+}
 
 // Replaces {{linkName}} placeholders in JSON embeds with live links.
 const applyLinks = (text, links) => {
@@ -137,14 +163,67 @@ const client = new Client({
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMessageReactions,
   ],
 });
 
+loadTrackedMessages();
+
 client.once("clientReady", () => {
   console.log(` ${client.user.tag} is online!`);
+  setInterval(checkUnreactedMessages, 15 * 60 * 1000);
 });
 
+async function checkUnreactedMessages() {
+  const now = Date.now();
+
+  for (const tracked of Object.values(trackedMessages)) {
+    if (tracked.reminded) continue;
+    if (now - tracked.createdAt < TWENTY_FOUR_HOURS_MS) continue;
+
+    try {
+      const channel = await client.channels.fetch(tracked.channelId);
+      const message = await channel.messages.fetch(tracked.messageId);
+
+      if (message.reactions.cache.size === 0) {
+        const officerChannel = await client.channels.fetch(OFFICER_CHANNEL_ID);
+        await officerChannel.send(`Reminder: This message has had no reactions for 24 hours:\n${message.url}`);
+        tracked.reminded = true;
+        saveTrackedMessages();
+      } else {
+        tracked.reminded = true;
+        saveTrackedMessages();
+      }
+    } catch (error) {
+      console.error(`Failed to check tracked message ${tracked.messageId}:`,
+        error,
+      );
+      tracked.reminded = true;
+      saveTrackedMessages();
+    }
+  }
+}
+
 client.on("messageCreate", async (message) => {
+  const isFromThisBot = message.author.id === client.user.id;
+  const isInWatchedChannel = message.channel.id === WATCHED_CHANNEL_ID;
+  const isFromWebhook = Boolean(message.webhookId);
+
+
+
+  if (!isFromThisBot && isInWatchedChannel && isFromWebhook) {
+    trackedMessages[message.id] = {
+      channelId: message.channel.id,
+      messageId: message.id,
+      createdAt: message.createdTimestamp,
+      reminded: false,
+    };
+    saveTrackedMessages();
+  }
+
+
+
+
   // Ignore bots, old messages, and messages that do not use the bot prefix.
   if (message.author?.bot) return;
   if (message.createdTimestamp < startedAt) return;
@@ -585,6 +664,11 @@ client.on("messageCreate", async (message) => {
       `Refreshed and pinned RaiderHub info in ${refreshedCount} channels.`,
     );
   }
+
+
+
+
+
 });
 
 client.login(token);
