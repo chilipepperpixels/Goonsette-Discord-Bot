@@ -35,6 +35,7 @@ const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
 const helpMessagePath = path.join(__dirname, "helpMessage.json");
 const defaultTrackedMessagesPath = path.join(__dirname, "trackedMessages.json");
+const defaultRaiderHubPostsPath = path.join(__dirname, "raiderHubPosts.json");
 
 // Railway uses a persistent volume for live-edited JSON; local runs use the repo file.
 const liveConfigPath = () => {
@@ -51,6 +52,12 @@ const liveTrackedMessagesPath = () => {
   return process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "trackedMessages.json")
     : defaultTrackedMessagesPath;
+};
+
+const liveRaiderHubPostsPath = () => {
+  return process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, "raiderHubPosts.json")
+    : defaultRaiderHubPostsPath;
 };
 
 // Categories where specific commands are allowed to run.
@@ -97,6 +104,7 @@ const WATCHED_CHANNEL_ID = "1396550738691493969";
 const OFFICER_CHANNEL_ID = "1322991455542710456";
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const trackedMessages = {};
+const raiderHubPosts = {};
 
 function loadTrackedMessages() {
   if (!fs.existsSync(liveTrackedMessagesPath())) return;
@@ -111,6 +119,53 @@ function saveTrackedMessages() {
     liveTrackedMessagesPath(),
     JSON.stringify(trackedMessages, null, 2),
   );
+}
+
+function loadRaiderHubPosts() {
+  if (!fs.existsSync(liveRaiderHubPostsPath())) return;
+  const savedPosts = JSON.parse(
+    fs.readFileSync(liveRaiderHubPostsPath(), "utf8"),
+  );
+  Object.assign(raiderHubPosts, savedPosts);
+}
+
+function saveRaiderHubPosts() {
+  fs.writeFileSync(
+    liveRaiderHubPostsPath(),
+    JSON.stringify(raiderHubPosts, null, 2),
+  );
+}
+
+const isRaiderHubInfoMessage = (message, payload) => {
+  if (message.author.id !== client.user.id) return false;
+  if (message.embeds.length !== payload.embeds.length) return false;
+
+  return payload.embeds.every((embed, index) => {
+    const postedEmbed = message.embeds[index];
+
+    return (
+      postedEmbed?.description === embed.description &&
+      postedEmbed?.color === embed.color
+    );
+  });
+};
+
+async function deleteSavedRaiderHubPost(channel, reason) {
+  const previousMessageId = raiderHubPosts[channel.id];
+  if (!previousMessageId) return false;
+
+  try {
+    const previousMessage = await channel.messages.fetch(previousMessageId);
+    if (previousMessage.author.id !== client.user.id) return false;
+
+    await previousMessage.delete(reason);
+    return true;
+  } catch (error) {
+    if (error.code === 10008) return false;
+    throw error;
+  } finally {
+    delete raiderHubPosts[channel.id];
+  }
 }
 
 // Replaces {{linkName}} placeholders in JSON embeds with live links.
@@ -168,6 +223,7 @@ const client = new Client({
 });
 
 loadTrackedMessages();
+loadRaiderHubPosts();
 
 client.once("clientReady", () => {
   console.log(` ${client.user.tag} is online!`);
@@ -555,7 +611,9 @@ client.on("messageCreate", async (message) => {
       parent: targetCategoryId,
     });
 
-    await createdChannel.send(guildMessagePayload());
+    const postedMessage = await createdChannel.send(guildMessagePayload());
+    raiderHubPosts[createdChannel.id] = postedMessage.id;
+    saveRaiderHubPosts();
 
     return message.reply(`Created new RaiderHub channel: ${createdChannel}`);
   }
@@ -631,19 +689,32 @@ client.on("messageCreate", async (message) => {
       return message.reply("No RaiderHub text channels found in the category.");
     }
 
+    const payload = guildMessagePayload();
+    const deleteReason = "Refreshing RaiderHub guild message.";
+    let deletedCount = 0;
     let refreshedCount = 0;
     const failedChannels = [];
 
     for (const channel of raiderHubChannels.values()) {
       try {
+        if (await deleteSavedRaiderHubPost(channel, deleteReason)) {
+          deletedCount++;
+        }
+
         const pinnedMessages = await channel.messages.fetchPinned();
 
         for (const pinnedMessage of pinnedMessages.values()) {
-          await pinnedMessage.unpin("Refreshing RaiderHub guild message.");
+          if (isRaiderHubInfoMessage(pinnedMessage, payload)) {
+            await pinnedMessage.delete(deleteReason);
+            deletedCount++;
+          } else {
+            await pinnedMessage.unpin(deleteReason);
+          }
         }
 
-        const postedMessage = await channel.send(guildMessagePayload());
-        await postedMessage.pin("Refreshing RaiderHub guild message.");
+        const postedMessage = await channel.send(payload);
+        await postedMessage.pin(deleteReason);
+        raiderHubPosts[channel.id] = postedMessage.id;
         refreshedCount++;
       } catch (error) {
         failedChannels.push(channel.name);
@@ -654,14 +725,16 @@ client.on("messageCreate", async (message) => {
       }
     }
 
+    saveRaiderHubPosts();
+
     if (failedChannels.length) {
       return message.reply(
-        `Refreshed ${refreshedCount}/${raiderHubChannels.size} RaiderHub channels. Failed: ${failedChannels.join(", ")}`,
+        `Refreshed ${refreshedCount}/${raiderHubChannels.size} RaiderHub channels and deleted ${deletedCount} old bot messages. Failed: ${failedChannels.join(", ")}`,
       );
     }
 
     return message.reply(
-      `Refreshed and pinned RaiderHub info in ${refreshedCount} channels.`,
+      `Refreshed and pinned RaiderHub info in ${refreshedCount} channels. Deleted ${deletedCount} old bot messages.`,
     );
   }
 
