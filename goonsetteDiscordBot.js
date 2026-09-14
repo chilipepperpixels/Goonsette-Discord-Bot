@@ -8,7 +8,7 @@ const {
 
 dotenv.config();
 
-// Permissions granted to a raider when they are added to a private RaiderHub channel.
+// Permissions granted to a raider when they  are added to a private RaiderHub channel.
 const allowedRaiderHubPermissionNames = [
   "ViewChannel",
   "SendMessages",
