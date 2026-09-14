@@ -23,7 +23,7 @@
       "embeds": [
         {
           "title": "RaiderHub Channel Commands",
-          "description": "**Create a new RaiderHub channel**\n`.newraiderhub`\n\nThis creates a new private RaiderHub channel in the RaiderHub category.\n\nThe bot names it automatically:\n`new-raider-hub-1`\n`new-raider-hub-2`\n`new-raider-hub-3`\n\nYou do not type a channel name.\n\n**Add a raider to the current RaiderHub channel**\n`.addraider @user`\n\nExample:\n`.addraider @Pepper`",
+          "description": "**Create a new RaiderHub channel**\n`.newraiderhub`\n\nThis creates a new private RaiderHub channel in this server. It uses your current category if it is a configured RaiderHub category; otherwise, it uses the first configured RaiderHub category in this server.\n\nThe bot names it automatically:\n`new-raider-hub-1`\n`new-raider-hub-2`\n`new-raider-hub-3`\n\nYou do not type a channel name.\n\n**Add a raider to the current RaiderHub channel**\n`.addraider @user`\n\nExample:\n`.addraider @Pepper`",
           "color": 16738740
         },
         {
@@ -52,7 +52,7 @@
         },
         {
           "title": "Other useful commands",
-          "description": "**Post the RaiderHub embed**\n`.raiderhub`\n\nThis posts the RaiderHub embed with the current saved links.\n\nUse this after `.edit` so you can check if you changed the correct thing.\n\n**Post only the important links**\n`.links`\n\nThis posts only the important links and documents embed.\n\nUse this if you do not need the full RaiderHub message.\n\n**Refresh every RaiderHub channel**\n`.postallrh`\n\nThis reposts and pins the RaiderHub info in every RaiderHub channel.\n\nOfficer command. Do not press the big shiny button unless you actually mean it.\n\n**Show this guide**\n`.help`\n\nThis posts this guide. Obviously. Somehow still useful.",
+          "description": "**Post the RaiderHub embed**\n`.raiderhub`\n\nThis posts the RaiderHub embed with the current saved links.\n\nUse this after `.edit` so you can check if you changed the correct thing.\n\n**Post only the important links**\n`.links`\n\nThis posts only the important links and documents embed.\n\nUse this if you do not need the full RaiderHub message.\n\n**Refresh every RaiderHub channel in this category**\n`.postallrh`\n\nThis reposts and pins the RaiderHub info in every text channel in the current RaiderHub category.\n\nOfficer command. Do not press the big shiny button unless you actually mean it.\n\n**Show this guide**\n`.help`\n\nThis posts this guide. Obviously. Somehow still useful.",
           "color": 5814783
         }
       ]

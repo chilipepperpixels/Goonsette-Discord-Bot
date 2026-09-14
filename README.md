@@ -49,7 +49,7 @@ Needs the allowed officer role.
 
 ### `.newraiderhub`
 
-Creates a new private RaiderHub channel in the RaiderHub category.
+Creates a new private RaiderHub channel in a configured RaiderHub category in the server where the command is used. If the current category is configured, it uses that category; otherwise, it uses the first configured category found in this server.
 
 It names them automatically:
 
@@ -122,6 +122,14 @@ Syntax check:
 ```bash
 node --check goonsetteDiscordBot.js
 ```
+
+## Multiple Servers
+
+In `goonsetteDiscordBot.js`, add each server's RaiderHub category ID to `raiderHubCategoryIds` and its officer role ID to `allowedRoles`. Keep IDs as quoted strings.
+
+`.newraiderhub` only selects categories in the server where it is used. `.addraider` works in any configured RaiderHub category, and `.postallrh` refreshes only the category where it is run.
+
+The bot must be invited to each server with the required permissions. All servers currently share the RaiderHub message and editable links from `guildMessage.json`.
 
 ## Environment Variables
 

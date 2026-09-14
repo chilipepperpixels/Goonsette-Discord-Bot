@@ -60,9 +60,15 @@ const liveRaiderHubPostsPath = () => {
     : defaultRaiderHubPostsPath;
 };
 
-// Categories where specific commands are allowed to run.
-const allowedCategories = [
+// Add RaiderHub category IDs here so all RaiderHub commands use the same list.
+const raiderHubCategoryIds = [
   "1363092698093064424",
+  "1529180249865326634",
+];
+
+// Categories where the RaiderHub info message can be posted.
+const allowedCategories = [
+  ...raiderHubCategoryIds,
   "1322990758847844423",
   "1364685463729999945",
 ];
@@ -74,8 +80,8 @@ const commands = new Map([
   ["edit", {}],
   ["links", {}],
   ["newraiderhub", {}],
-  ["addraider", { allowedCategories: ["1363092698093064424"] }],
-  ["postallrh", { allowedCategories: ["1363092698093064424"] }],
+  ["addraider", { allowedCategories: raiderHubCategoryIds }],
+  ["postallrh", { allowedCategories: raiderHubCategoryIds }],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -99,9 +105,11 @@ const normalizedBlockedTags = rule34BlockedTags.map((tag) =>
 //  `${prefix}${[command, ...args].join(" ")}`;
 const isVideoUrl = (url) => /\.(mp4|webm)(?:[?#].*)?$/i.test(url);
 const allowedChannel = ["1466449507972812924", "1322991455542710456"];
-const allowedRoles = ["1466907960272748696"];
-const WATCHED_CHANNEL_ID = "1396550738691493969";
-const OFFICER_CHANNEL_ID = "1322991455542710456";
+const allowedRoles = ["1466907960272748696", "1529175768926785667"];
+const OFFICER_CHANNEL_BY_WATCHED_CHANNEL = {
+  "1396550738691493969": "1322991455542710456",
+  "1529179631369060393": "1529179556232298656",
+};
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const trackedMessages = {};
 const raiderHubPosts = {};
@@ -242,7 +250,9 @@ async function checkUnreactedMessages() {
       const message = await channel.messages.fetch(tracked.messageId);
 
       if (message.reactions.cache.size === 0) {
-        const officerChannel = await client.channels.fetch(OFFICER_CHANNEL_ID);
+        const officerChannelId =
+          OFFICER_CHANNEL_BY_WATCHED_CHANNEL[tracked.channelId];
+        const officerChannel = await client.channels.fetch(officerChannelId);
         await officerChannel.send(`Reminder: This message has had no reactions for 24 hours:\n${message.url}`);
         tracked.reminded = true;
         saveTrackedMessages();
@@ -262,7 +272,10 @@ async function checkUnreactedMessages() {
 
 client.on("messageCreate", async (message) => {
   const isFromThisBot = message.author.id === client.user.id;
-  const isInWatchedChannel = message.channel.id === WATCHED_CHANNEL_ID;
+  const isInWatchedChannel = Object.hasOwn(
+    OFFICER_CHANNEL_BY_WATCHED_CHANNEL,
+    message.channel.id,
+  );
   const isFromWebhook = Boolean(message.webhookId);
 
 
@@ -586,7 +599,20 @@ client.on("messageCreate", async (message) => {
         "You do not have permission to use this command. You can look at my boobs though!",
       );
     }
-    const targetCategoryId = "1363092698093064424";
+    await message.guild.channels.fetch();
+    const serverCategoryIds = raiderHubCategoryIds.filter(
+      (categoryId) =>
+        message.guild.channels.cache.get(categoryId)?.type ===
+        ChannelType.GuildCategory,
+    );
+    const targetCategoryId = serverCategoryIds.includes(message.channel.parentId)
+      ? message.channel.parentId
+      : serverCategoryIds[0];
+
+    if (!targetCategoryId) {
+      return message.reply("No RaiderHub category is configured for this server.");
+    }
+
     const baseName = "new-raider-hub";
 
     const channelIsInCategory = message.guild.channels.cache.filter(
@@ -630,9 +656,7 @@ client.on("messageCreate", async (message) => {
       );
     }
 
-    const raiderHubCategoryId = "1363092698093064424";
-
-    if (message.channel.parentId !== raiderHubCategoryId) {
+    if (!raiderHubCategoryIds.includes(message.channel.parentId)) {
       return message.reply(
         "You can only use this command in a RaiderHub channel.",
       );
@@ -673,7 +697,7 @@ client.on("messageCreate", async (message) => {
       );
     }
 
-    const raiderHubCategoryId = "1363092698093064424";
+    const raiderHubCategoryId = message.channel.parentId;
     await message.guild.channels.fetch();
 
     const raiderHubChannels = message.guild.channels.cache
