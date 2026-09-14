@@ -105,7 +105,7 @@ const normalizedBlockedTags = rule34BlockedTags.map((tag) =>
 //  `${prefix}${[command, ...args].join(" ")}`;
 const isVideoUrl = (url) => /\.(mp4|webm)(?:[?#].*)?$/i.test(url);
 const allowedChannel = ["1466449507972812924", "1322991455542710456"];
-const allowedRoles = ["1466907960272748696", "1529175768926785667"];
+const allowedRoles = ["1466907960272748696", "1529175768926785667","1529175374288912406"];
 const OFFICER_CHANNEL_BY_WATCHED_CHANNEL = {
   "1396550738691493969": "1322991455542710456",
   "1529179631369060393": "1529179556232298656",
