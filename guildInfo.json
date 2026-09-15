@@ -24,7 +24,7 @@
             "description": "## <:scroll:1549398177378074679> | How to join?\n\n To join our guild, please visit our [**recruitment channel**](<{{recruitmentChannel}}>) and fill out the application form. We will review your application and get back to you as soon as possible."
         },
         {
-            "description": "## <:link:1549398437194371168> | Important links\n\n [**Guild Discord**]({{permalink}}) - USE THIS LINK TO INVITE PEOPLE PLEASE!\n [**Warcraftlogs profile**](<{{warcraftlogsProfileMop}}>) - Visit our Warcraftlogs profile to learn more about our accomplishments."
+            "description": "## <:link:1549398437194371168> | Important links\n\n **Permalink**: https://discord.gg/qv4StvHKft - USE THIS LINK TO INVITE PEOPLE PLEASE!\n [**Warcraftlogs profile**](<{{warcraftlogsProfileMop}}>) - Visit our Warcraftlogs profile to learn more about our accomplishments."
         }
 
 

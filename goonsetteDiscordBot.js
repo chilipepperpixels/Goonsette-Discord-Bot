@@ -555,7 +555,7 @@ client.on("messageCreate", async (message) => {
     }
 
     try {
-      // Read the new message before deleting the channel's previous messages.
+      // Read the new message before deleting the channel's previous 
       const guildInfo = JSON.parse(
         fs.readFileSync(path.join(__dirname, "guildInfo.json"), "utf8"),
       );
@@ -608,7 +608,14 @@ client.on("messageCreate", async (message) => {
         if (error.code !== 10008) throw error;
       }
 
-      // Post the new guild info.
+      // Post the image first.
+      await message.channel.send({
+        files: [
+          path.join(__dirname, "fd25eb62-5232-4b8a-9b89-3e8df5971bb7.png"),
+        ],
+      });
+
+      // Post the embeds underneath.
       return await message.channel.send({ embeds });
     } catch (error) {
       console.error("Failed to refresh guild info:", error);
