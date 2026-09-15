@@ -33,7 +33,7 @@ const startedAt = Date.now();
 const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
-const helpMessagePath = path.join(__dirname, "helpMessage.json");
+const Path = path.join(__dirname, "helpMessage.json");
 const defaultTrackedMessagesPath = path.join(__dirname, "trackedMessages.json");
 const defaultRaiderHubPostsPath = path.join(__dirname, "raiderHubPosts.json");
 
@@ -82,6 +82,7 @@ const commands = new Map([
   ["newraiderhub", {}],
   ["addraider", { allowedCategories: raiderHubCategoryIds }],
   ["postallrh", { allowedCategories: raiderHubCategoryIds }],
+  ["guildInfo", { allowedroles: adminId }],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -104,12 +105,13 @@ const normalizedBlockedTags = rule34BlockedTags.map((tag) =>
 //const formatCommand = ({ command, args }) =>
 //  `${prefix}${[command, ...args].join(" ")}`;
 const isVideoUrl = (url) => /\.(mp4|webm)(?:[?#].*)?$/i.test(url);
-const allowedChannel = ["1466449507972812924", "1322991455542710456","1549083157196963870","1529179556232298656"];
-const allowedRoles = ["1466907960272748696", "1529175768926785667","1529175374288912406","1529175768926785667","1529177372887224351","1529177115327463436","1529176243701026998"];
+const allowedChannel = ["1466449507972812924", "1322991455542710456", "1549083157196963870", "1529179556232298656"];
+const allowedRoles = ["1466907960272748696", "1529175768926785667", "1529175374288912406", "1529175768926785667", "1529177372887224351", "1529177115327463436", "1529176243701026998"];
 const OFFICER_CHANNEL_BY_WATCHED_CHANNEL = {
   "1396550738691493969": "1322991455542710456",
   "1529179631369060393": "1529179556232298656",
 };
+const adminId = "1529175374288912406",
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 const trackedMessages = {};
 const raiderHubPosts = {};
@@ -540,6 +542,46 @@ client.on("messageCreate", async (message) => {
     }
 
     return;
+  }
+
+  if (command === "guildinfo") {
+    // guildInfo message only admin can post
+    const hasAdminRole = message.member.roles.cache.has(adminId);
+
+    if (!hasAdminRole) {
+      return message.reply(
+        "You do not have permission to use this command. You can look at my boobs though!",
+      );
+    }
+
+    let before = message.id;
+
+    while (true) {
+      const previousMessages = await message.channel.messages.fetch({
+        limit: 100,
+        before,
+      });
+
+      if (previousMessages.size === 0) break;
+
+      before = previousMessages.last().id;
+
+      for (const oldMessage of previousMessages.values()) {
+        try {
+          await oldMessage.delete();
+        } catch (error) {
+          // Ignore messages that were already deleted.
+          if (error.code !== 10008) throw error;
+        }
+      }
+    }
+
+    // Remove your .guildinfo command too.
+    await message.delete();
+
+    // Post the new guild info.
+    return message.channel.send({ embeds });
+
   }
 
   if (command === "edit") {
