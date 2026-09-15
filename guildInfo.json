@@ -9,22 +9,22 @@
 
     "embeds":[
         {
-            "description": "## <:emoji_name:1549382667835801705> | Who are we?\n\n Drumroll is a long standing guild originally formed in the ancient times of Classic 19. We are a progression oriented raiding guild that focuses on clearing content at the highest possible difficulty and as efficiently as possible"
+            "description": "## <:question:1549382667835801705> | Who are we?\n\n Drumroll is a long standing guild originally formed in the ancient times of Classic 19. We are a progression oriented raiding guild that focuses on clearing content at the highest possible difficulty and as efficiently as possible"
         },
         {
-            "description": "## <:emoji_name:1549384448523636807> | What do we offer?\n\n We offer a friendly and welcoming environment for all players, regardless of experience level. Our guild is focused on progression raiding, but we also offer a variety of other activities such as PvP, dungeons, and social events."
+            "description": "## <:heart_hands:1549384448523636807> | What do we offer?\n\n We offer a friendly and welcoming environment for all players, regardless of experience level. Our guild is focused on progression raiding, but we also offer a variety of other activities such as PvP, dungeons, and social events."
         },
         {
-            "description": "## <:emoji_name:1549388159140241409> | What do we expect?\n\n We expect our members to be competent who want to improve and learn, capable of taking constructive criticism and willing to put in the effort to improve their skills. When it comes to raiders, we expect to have at least 90% attendance and to be on time for raids. Be friendly, communicate and be respectful to your fellow guild members. We are a team and we work together to achieve our goals. Harmless banter is always welcome!"
+            "description": "## <:pinched_fingers:1549388159140241409> | What do we expect?\n\n We expect our members to be competent who want to improve and learn, capable of taking constructive criticism and willing to put in the effort to improve their skills. When it comes to raiders, we expect to have at least 90% attendance and to be on time for raids. Be friendly, communicate and be respectful to your fellow guild members. We are a team and we work together to achieve our goals. Harmless banter is always welcome!"
         },
         {
-            "description":"## <:emoji_name:1549388315357220885> | Raid times:\n\n Our raid times are as follows:\n\n- **Thursday:** 20:00 - 23:30 (Server Time)\n- **Sunday:** 20:00 - 23:30 (Server Time)\n- **Tuesday (progression):** 20:00 - 23:30 (Server Time)\n\nPlease make sure to be on time and ready to raid. If you cannot make it to a raid, please fill out the [**Absence Form**](<{{absenceForm}}>) in advance."
+            "description":"## <:calendar:1549388315357220885> | Raid times:\n\n Our raid times are as follows:\n\n- **Thursday:** 20:00 - 23:30 (Server Time)\n- **Sunday:** 20:00 - 23:30 (Server Time)\n- **Tuesday (progression):** 20:00 - 23:30 (Server Time)\n\nPlease make sure to be on time and ready to raid. If you cannot make it to a raid, please fill out the [**Absence Form**](<{{absenceForm}}>) in advance."
         },
         {
-            "description": "## <:emoji_name:1549385491986649099> | How to join?\n\n To join our guild, please visit our [**recruitment channel**](<{{recruitmentChannel}}>) and fill out the application form. We will review your application and get back to you as soon as possible."
+            "description": "## <:scroll:1549398177378074679> | How to join?\n\n To join our guild, please visit our [**recruitment channel**](<{{recruitmentChannel}}>) and fill out the application form. We will review your application and get back to you as soon as possible."
         },
         {
-            "description": "## <:emoji_name:1549386538758971475> | Important links\n\n [**Guild Discord**](<{{permalink}}>) - USE THIS LINK TO INVITE PEOPLE PLEASE!\n [**Warcraftlogs profile**](<{{warcraftlogsProfileMop}}>) - Visit our Warcraftlogs profile to learn more about our accomplishments."
+            "description": "## <:link:1549398437194371168> | Important links\n\n [**Guild Discord**]({{permalink}}) - USE THIS LINK TO INVITE PEOPLE PLEASE!\n [**Warcraftlogs profile**](<{{warcraftlogsProfileMop}}>) - Visit our Warcraftlogs profile to learn more about our accomplishments."
         }
 
 
