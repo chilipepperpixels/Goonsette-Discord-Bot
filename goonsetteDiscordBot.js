@@ -572,10 +572,11 @@ client.on("messageCreate", async (message) => {
         PermissionFlagsBits.ManageMessages,
         PermissionFlagsBits.SendMessages,
         PermissionFlagsBits.EmbedLinks,
+        PermissionFlagsBits.AttachFiles,
       ];
       if (!message.channel.permissionsFor(client.user)?.has(requiredPermissions)) {
         return await message.reply(
-          "I need View Channel, Read Message History, Manage Messages, Send Messages, and Embed Links permissions to refresh the guild info.",
+          "I need View Channel, Read Message History, Manage Messages, Send Messages, Embed Links, and Attach Files permissions to refresh the guild info.",
         );
       }
 
