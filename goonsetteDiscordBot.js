@@ -33,7 +33,7 @@ const startedAt = Date.now();
 const fs = require("fs");
 const path = require("path");
 const defaultConfigPath = path.join(__dirname, "guildMessage.json");
-const Path = path.join(__dirname, "helpMessage.json");
+const helpMessagePath = path.join(__dirname, "helpMessage.json");
 const defaultTrackedMessagesPath = path.join(__dirname, "trackedMessages.json");
 const defaultRaiderHubPostsPath = path.join(__dirname, "raiderHubPosts.json");
 
@@ -82,7 +82,7 @@ const commands = new Map([
   ["newraiderhub", {}],
   ["addraider", { allowedCategories: raiderHubCategoryIds }],
   ["postallrh", { allowedCategories: raiderHubCategoryIds }],
-  ["guildInfo", { allowedroles: adminId }],
+  ["guildinfo", {}],
 ]);
 const rule34UserId = process.env.RULE34_USER_ID;
 const rule34ApiKey = process.env.RULE34_API_KEY;
@@ -554,34 +554,70 @@ client.on("messageCreate", async (message) => {
       );
     }
 
-    let before = message.id;
+    try {
+      // Read the new message before deleting the channel's previous messages.
+      const guildInfo = JSON.parse(
+        fs.readFileSync(path.join(__dirname, "guildInfo.json"), "utf8"),
+      );
+      const embeds = guildInfo.embeds.map((embed) => ({
+        ...embed,
+        description: embed.description
+          ? applyLinks(embed.description, guildInfo.links)
+          : embed.description,
+      }));
 
-    while (true) {
-      const previousMessages = await message.channel.messages.fetch({
-        limit: 100,
-        before,
-      });
+      const requiredPermissions = [
+        PermissionFlagsBits.ViewChannel,
+        PermissionFlagsBits.ReadMessageHistory,
+        PermissionFlagsBits.ManageMessages,
+        PermissionFlagsBits.SendMessages,
+        PermissionFlagsBits.EmbedLinks,
+      ];
+      if (!message.channel.permissionsFor(client.user)?.has(requiredPermissions)) {
+        return await message.reply(
+          "I need View Channel, Read Message History, Manage Messages, Send Messages, and Embed Links permissions to refresh the guild info.",
+        );
+      }
 
-      if (previousMessages.size === 0) break;
+      let before = message.id;
 
-      before = previousMessages.last().id;
+      while (true) {
+        const previousMessages = await message.channel.messages.fetch({
+          limit: 100,
+          before,
+        });
 
-      for (const oldMessage of previousMessages.values()) {
-        try {
-          await oldMessage.delete();
-        } catch (error) {
-          // Ignore messages that were already deleted.
-          if (error.code !== 10008) throw error;
+        if (previousMessages.size === 0) break;
+
+        before = previousMessages.last().id;
+
+        for (const oldMessage of previousMessages.values()) {
+          try {
+            await oldMessage.delete();
+          } catch (error) {
+            // Ignore messages that were already deleted.
+            if (error.code !== 10008) throw error;
+          }
         }
       }
+
+      // Remove your .guildinfo command too.
+      try {
+        await message.delete();
+      } catch (error) {
+        if (error.code !== 10008) throw error;
+      }
+
+      // Post the new guild info.
+      return await message.channel.send({ embeds });
+    } catch (error) {
+      console.error("Failed to refresh guild info:", error);
+      return message.channel.send(
+        "I couldn't finish refreshing the guild info. Check my channel permissions and guildInfo.json.",
+      ).catch((sendError) => {
+        console.error("Failed to send guild info error message:", sendError);
+      });
     }
-
-    // Remove your .guildinfo command too.
-    await message.delete();
-
-    // Post the new guild info.
-    return message.channel.send({ embeds });
-
   }
 
   if (command === "edit") {
